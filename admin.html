@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-user-lock"></i> Admin Panel</h1>
+        <a href="index.html" class="back-home-btn"><i class="fas fa-home"></i> Home</a>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <div id="side-menu" class="side-menu">
+        <button class="close-btn" aria-label="Tutup Menu">×</button>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="wisata-home.html"><i class="fas fa-umbrella-beach"></i> Wisata</a>
+            <a href="transportasi.html"><i class="fas fa-plane"></i> Transportasi</a>
+            <a href="hotel.html"><i class="fas fa-hotel"></i> Hotel</a>
+            <div class="separator"></div>
+            <a href="account.html" id="account-link"><i class="fas fa-user-circle"></i> Akun (Login/Signup)</a>
+        </nav>
+    </div>
+
+    <main id="admin-main">
+        <p style="text-align: center; margin-top: 50px;">Memuat dashboard...</p>
+        </main>
+
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script>
+    <script>
+        // SCRIPT LOKAL KHUSUS ADMIN.HTML (Ganti SELURUHNYA)
+
+document.addEventListener('DOMContentLoaded', () => {
+    const user = getLoggedInUser();
+    const main = document.getElementById('admin-main');
+
+    if (!user || user.role !== 'admin') {
+        main.innerHTML = `<p style="text-align: center; color: red; margin-top: 50px;">Akses Ditolak. Anda bukan Administrator.</p>`;
+        return;
+    }
+
+    renderAdminDashboard();
+
+    function renderAdminDashboard() {
+        main.innerHTML = `
+            <div class="admin-dashboard-container">
+                <nav class="admin-tabs">
+                    <button class="tab-btn active" data-tab="system"><i class="fas fa-tools"></i> Sistem & Broadcast</button>
+                    <button class="tab-btn" data-tab="users"><i class="fas fa-users-cog"></i> Manajemen Pengguna</button>
+                    <button class="tab-btn" data-tab="content"><i class="fas fa-map-marked-alt"></i> Kelola Wisata</button>
+                </nav>
+                
+                <div id="tab-content">
+                    </div>
+            </div>
+        `;
+
+        // Event Listener untuk Tab
+        document.querySelectorAll('.admin-tabs .tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.getAttribute('data-tab');
+                document.querySelectorAll('.admin-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderTabContent(tabName);
+            });
+        });
+
+        // Tampilkan tab default
+        renderTabContent('system');
+    }
+
+    function renderTabContent(tab) {
+        const contentDiv = document.getElementById('tab-content');
+        contentDiv.innerHTML = ''; // Kosongkan konten
+        
+        if (tab === 'system') {
+            contentDiv.innerHTML = `
+                <section id="system-controls" class="card-section admin-tab-section">
+                    <h3><i class="fas fa-bullhorn"></i> Broadcast & Maintenance</h3>
+                    <div class="grid-2">
+                        <div class="control-box">
+                            <h4>Mode Maintenance</h4>
+                            <label><input type="checkbox" id="maintenance-toggle"> Mode Maintenance Aktif</label>
+                            <textarea id="maintenance-msg" placeholder="Pesan maintenance..." class="admin-textarea"></textarea>
+                        </div>
+                        <div class="control-box">
+                            <h4>Pesan Broadcast Global</h4>
+                            <label><input type="checkbox" id="broadcast-toggle"> Broadcast Aktif</label>
+                            <textarea id="broadcast-msg" placeholder="Pesan broadcast global..." class="admin-textarea"></textarea>
+                        </div>
+                    </div>
+                    <button id="save-system-btn" class="action-btn primary-btn" style="margin-top: 20px;"><i class="fas fa-save"></i> Simpan Pengaturan Sistem</button>
+                </section>
+            `;
+            loadSystemControls();
+        } else if (tab === 'users') {
+            contentDiv.innerHTML = `
+                <section id="user-management" class="card-section admin-tab-section">
+                    <h3><i class="fas fa-users-cog"></i> Manajemen Pengguna (Ban/Unban)</h3>
+                    <div id="user-list-admin" class="data-list"></div>
+                </section>
+            `;
+            renderUserList();
+        } else if (tab === 'content') {
+            contentDiv.innerHTML = `
+                <section id="content-management" class="card-section admin-tab-section">
+                    <h3><i class="fas fa-map-marked-alt"></i> Kelola Data Wisata (Multi-Foto)</h3>
+                    <button id="toggle-add-wisata" class="action-btn primary-btn" style="margin-bottom: 15px;"><i class="fas fa-plus"></i> Tambah Wisata Baru</button>
+                    <div id="wisata-add-edit-form" class="booking-form-container" style="display: none; margin-bottom: 20px;"></div>
+                    <h4>Daftar Semua Wisata:</h4>
+                    <div id="wisata-list-admin" class="data-list"></div>
+                </section>
+            `;
+            // Pasang event listener untuk form toggle
+            document.getElementById('toggle-add-wisata').addEventListener('click', () => {
+                const formDiv = document.getElementById('wisata-add-edit-form');
+                if (formDiv.style.display === 'none') {
+                    renderWisataForm({});
+                    formDiv.style.display = 'block';
+                } else {
+                    formDiv.style.display = 'none';
+                }
+            });
+            renderWisataList();
+        }
+    }
+    
+    // --- FUNGSIONALITAS TETAP (PASTIKAN SEMUA FUNCT DIPANGGIL DI SINI) ---
+    // (Tambahkan kembali semua fungsi loadSystemControls, renderUserList, renderWisataList, dll.)
+    
+    // ... (Fungsi loadSystemControls, renderUserList, showBanModal, unbanUserAction, renderWisataList, editWisata, deleteWisata, renderWisataForm, handleAddEdit)
+    // ... (Harus ada di sini, pastikan mereka berada di scope script ini)
+    
+    // [HARAP PASTE SEMUA FUNGSI DARI KODE ADMIN.HTML SEBELUMNYA DI BAWAH INI]
+    
+    // --- FUNGSI DARI ADMIN.HTML SEBELUMNYA HARUS DIMASUKKAN DI SINI: ---
+    
+    function loadSystemControls() {
+        const maintenance = getMaintenanceStatus();
+        const broadcast = getBroadcastStatus();
+        
+        document.getElementById('maintenance-toggle').checked = maintenance;
+        document.getElementById('maintenance-msg').value = localStorage.getItem('maintenanceMessage') || '';
+        document.getElementById('broadcast-toggle').checked = broadcast.active;
+        document.getElementById('broadcast-msg').value = broadcast.message;
+
+        document.getElementById('save-system-btn').addEventListener('click', () => {
+            localStorage.setItem(MAINTENANCE_KEY, document.getElementById('maintenance-toggle').checked.toString());
+            localStorage.setItem('maintenanceMessage', document.getElementById('maintenance-msg').value.trim());
+            
+            window.setBroadcastStatus(
+                document.getElementById('broadcast-toggle').checked,
+                document.getElementById('broadcast-msg').value.trim()
+            );
+            alert('Pengaturan sistem berhasil disimpan!');
+            window.location.reload(); 
+        });
+    }
+
+    // Fungsi Ban/Unban harus diletakkan di scope window agar bisa dipanggil dari inline HTML
+    window.unbanUserAction = (id) => {
+        window.unbanUser(id);
+        alert(`Pengguna ID ${id} berhasil di-unban.`);
+        renderUserList();
+    };
+
+    window.showBanModal = (id) => {
+        const days = prompt(`Masukkan jumlah hari ban untuk user ID ${id}:`);
+        const daysInt = parseInt(days);
+        if (daysInt > 0) {
+            const banUntil = new Date();
+            banUntil.setDate(banUntil.getDate() + daysInt);
+            window.banUser(id, banUntil.getTime());
+            alert(`User ID ${id} dibanned selama ${daysInt} hari.`);
+            renderUserList();
+        } else if (days !== null) {
+            alert('Input tidak valid atau dibatalkan.');
+        }
+    };
+
+    function renderUserList() {
+        const listContainer = document.getElementById('user-list-admin');
+        const users = window.getAllUsers().filter(u => u.role !== 'admin'); 
+        const bannedUsers = window.getBannedUsers();
+
+        if (users.length === 0) {
+            listContainer.innerHTML = '<p>Tidak ada pengguna terdaftar (selain admin).</p>';
+            return;
+        }
+
+        listContainer.innerHTML = users.map(u => {
+            const isBanned = bannedUsers.find(b => b.id === u.id);
+            const banStatus = isBanned 
+                ? `<span style="color: red; font-weight: bold;">(BANNED s/d ${new Date(isBanned.unbanTime).toLocaleDateString()})</span>`
+                : '';
+            return `
+                <div class="list-item-admin">
+                    <span><strong>${u.profileName}</strong> (${u.username}) ${banStatus}</span>
+                    <div>
+                        ${isBanned 
+                            ? `<button onclick="unbanUserAction(${u.id})" class="action-btn-small" style="background-color: #5bc0de;"><i class="fas fa-undo"></i> Unban</button>`
+                            : `<button onclick="showBanModal(${u.id})" class="action-btn-small" style="background-color: #d9534f;"><i class="fas fa-ban"></i> Ban</button>`
+                        }
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    window.editWisata = (id) => {
+        const wisata = getWisataData().find(w => w.id === id);
+        if (wisata) {
+            renderWisataForm(wisata);
+            document.getElementById('wisata-add-edit-form').style.display = 'block';
+            window.scrollTo({ top: document.getElementById('wisata-add-edit-form').offsetTop, behavior: 'smooth' });
+        }
+    };
+    
+    window.deleteWisata = (id) => {
+        if (!confirm("Yakin ingin menghapus wisata ini?")) return;
+        let data = getWisataData();
+        data = data.filter(w => w.id !== id);
+        saveWisataData(data);
+        renderWisataList();
+        alert("Wisata berhasil dihapus.");
+    };
+
+    function renderWisataList() {
+        const listContainer = document.getElementById('wisata-list-admin');
+        const data = getWisataData();
+
+        if (data.length === 0) {
+            listContainer.innerHTML = '<p>Belum ada data wisata.</p>';
+            return;
+        }
+
+        listContainer.innerHTML = data.map(w => `
+            <div class="list-item-admin">
+                <span><strong>${w.nama}</strong> (${w.daerah}) - ${w.gambar.length} Foto</span>
+                <div>
+                    <button onclick="editWisata(${w.id})" class="action-btn-small primary-btn" style="background-color: #ffc107;"><i class="fas fa-edit"></i> Edit</button>
+                    <button onclick="deleteWisata(${w.id})" class="action-btn-small" style="background-color: #dc3545;"><i class="fas fa-trash"></i> Hapus</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderWisataForm(wisata = {}) {
+        const isEdit = !!wisata.id;
+        const formDiv = document.getElementById('wisata-add-edit-form');
+        const primaryColor = document.documentElement.style.getPropertyValue('--primary-color') || '#0077b6'; 
+        
+        formDiv.innerHTML = `
+            <h4>${isEdit ? 'Edit' : 'Tambah'} Data Wisata</h4>
+            <form id="wisata-form">
+                <input type="hidden" id="wisata-id" value="${wisata.id || ''}">
+                
+                <label for="nama">Nama Wisata:</label>
+                <input type="text" id="nama" value="${wisata.nama || ''}" required>
+                
+                <label for="daerah">Daerah:</label>
+                <input type="text" id="daerah" value="${wisata.daerah || ''}" required>
+                
+                <label for="harga">Harga Tiket (Rp):</label>
+                <input type="number" id="harga" value="${wisata.harga || 0}" required>
+                
+                <label for="lokasi">URL Lokasi (Google Maps):</label>
+                <input type="text" id="lokasi" value="${wisata.lokasi || '#'}" required>
+                
+                <label for="deskripsi">Deskripsi:</label>
+                <textarea id="deskripsi" required>${wisata.deskripsi || ''}</textarea>
+                
+                <label for="gambar">Gambar (URL, pisahkan dengan koma):</label>
+                <input type="text" id="gambar" value="${wisata.gambar ? wisata.gambar.join(', ') : ''}" 
+                       placeholder="url1.jpg, url2.jpg, url3.jpg (bisa lebih dari 2)" required>
+                
+                <button type="submit" class="action-btn primary-btn" style="background-color: ${isEdit ? '#ffc107' : primaryColor}; margin-top: 15px;">
+                    <i class="fas fa-save"></i> ${isEdit ? 'Simpan Perubahan' : 'Tambah Wisata'}
+                </button>
+                ${isEdit ? '<button type="button" onclick="document.getElementById(\'wisata-add-edit-form\').style.display = \'none\'" class="action-btn secondary-btn" style="background-color: #6c757d; margin-left: 10px;">Batal</button>' : ''}
+            </form>
+        `;
+
+        document.getElementById('wisata-form').addEventListener('submit', handleAddEdit);
+    }
+
+    function handleAddEdit(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('wisata-id').value;
+        const nama = document.getElementById('nama').value.trim();
+        const daerah = document.getElementById('daerah').value.trim();
+        const harga = parseInt(document.getElementById('harga').value);
+        const lokasi = document.getElementById('lokasi').value.trim();
+        const deskripsi = document.getElementById('deskripsi').value.trim();
+        const gambarStr = document.getElementById('gambar').value.trim();
+        
+        const gambarArray = gambarStr.split(',').map(url => url.trim()).filter(url => url.length > 0);
+        
+        if (gambarArray.length === 0) {
+            alert("Minimal harus ada 1 URL Gambar.");
+            return;
+        }
+
+        let data = getWisataData();
+        let newWisata;
+        
+        if (id) {
+            const existingIndex = data.findIndex(w => w.id === parseInt(id));
+            if (existingIndex !== -1) {
+                newWisata = data[existingIndex];
+                newWisata.nama = nama;
+                newWisata.daerah = daerah;
+                newWisata.harga = harga;
+                newWisata.lokasi = lokasi;
+                newWisata.deskripsi = deskripsi;
+                newWisata.gambar = gambarArray; 
+            }
+        } else {
+            newWisata = {
+                id: getNextId(),
+                nama, daerah, harga, lokasi, deskripsi, gambar: gambarArray,
+                rating: 0, 
+                ulasan: []
+            };
+            data.push(newWisata);
+        }
+
+        saveWisataData(data);
+        alert(`Data Wisata ${newWisata.nama} berhasil disimpan.`);
+        document.getElementById('wisata-add-edit-form').style.display = 'none';
+        renderWisataList();
+    }
+    // --- AKHIR FUNGSI LAMA ---
+});
+    </script>
+</body>
+</html>

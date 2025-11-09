@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Transportasi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script>
+    <header>
+        <a href="index.html" class="back-home-btn"><i class="fas fa-arrow-left"></i> Home Utama</a>
+        <h1>Booking Transportasi</h1>
+        <p>Pesan tiket pesawat, kereta, atau bus dengan mudah.</p>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <div id="side-menu" class="side-menu">
+        </div>
+
+    <main>
+        <section class="booking-form-container">
+            <h2>Pencarian Tiket</h2>
+            <form id="transport-form">
+                <label for="jenis">Jenis Transportasi:</label>
+                <select id="jenis" required>
+                    <option value="pesawat">Pesawat</option>
+                    <option value="kereta">Kereta</option>
+                    <option value="bus">Bus</option>
+                </select>
+
+                <label for="asal">Kota Asal:</label>
+                <input type="text" id="asal" placeholder="Jakarta" required>
+
+                <label for="tujuan">Kota Tujuan:</label>
+                <input type="text" id="tujuan" placeholder="Bali" required>
+
+                <label for="tanggal">Tanggal Pergi:</label>
+                <input type="date" id="tanggal" required>
+
+                <label for="jumlah">Jumlah Penumpang:</label>
+                <input type="number" id="jumlah" min="1" value="1" required>
+
+                <button type="submit" style="background-color: var(--accent-color); color: white;"><i class="fas fa-search"></i> Cari Tiket</button>
+            </form>
+            
+            <div id="transport-results" style="margin-top: 30px;">
+                <p>Fitur booking ini masih dalam tahap simulasi. Tekan 'Cari Tiket' untuk melihat contoh hasil.</p>
+            </div>
+        </section>
+    </main>
+
+    
+</body>
+</html>

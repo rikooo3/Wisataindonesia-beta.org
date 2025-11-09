@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Hotel</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script>
+    <header>
+        <a href="index.html" class="back-home-btn"><i class="fas fa-arrow-left"></i> Home Utama</a>
+        <h1>Booking Hotel</h1>
+        <p>Cari dan pesan penginapan di seluruh Indonesia.</p>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <div id="side-menu" class="side-menu">
+        </div>
+
+    <main>
+    <section class="card-section">
+        <h2>🏨 Cari & Pesan Hotel</h2>
+        <div class="booking-form-container">
+            <form id="hotel-booking-form">
+                <div class="form-group">
+                    <label for="hotel-location">Lokasi:</label>
+                    <input type="text" id="hotel-location" required placeholder="Contoh: Bali, Bandung, Surabaya">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="check-in">Check-in:</label>
+                        <input type="date" id="check-in" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="check-out">Check-out:</label>
+                        <input type="date" id="check-out" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rooms">Jumlah Kamar:</label>
+                        <input type="number" id="rooms" min="1" max="5" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="guests">Jumlah Tamu:</label>
+                        <input type="number" id="guests" min="1" max="10" value="2" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="action-btn" style="background-color: var(--secondary-color);"><i class="fas fa-hotel"></i> Cari Hotel</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="hotel-recommendations" class="card-section" style="display: none;">
+        <h3>Rekomendasi Terbaik</h3>
+        <p style="text-align: center; color: #666;">*Rekomendasi hotel simulasi akan ditampilkan di sini*</p>
+    </section>
+</main>
+
+    
+</body>
+</html>

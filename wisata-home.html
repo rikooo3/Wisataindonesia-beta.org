@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wisata Laut Indonesia | Cari</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script>
+    <header>
+        <a href="index.html" class="back-home-btn"><i class="fas fa-arrow-left"></i> Home Utama</a>
+        <h1>Wisata Laut Indonesia</h1>
+        <p>Jelajahi keindahan pantai dan laut di Indonesia</p>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <div id="side-menu" class="side-menu">
+        <button class="close-btn" aria-label="Tutup Menu">&times;</button>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="wisata-home.html"><i class="fas fa-umbrella-beach"></i> Wisata</a>
+            <a href="transportasi.html"><i class="fas fa-plane"></i> Transportasi</a>
+            <a href="hotel.html"><i class="fas fa-hotel"></i> Hotel</a>
+            <div class="separator"></div>
+            <a href="account.html" id="account-link"><i class="fas fa-user-circle"></i> Akun (Login/Signup)</a>
+        </nav>
+    </div>
+    
+    <main>
+        <section id="search-filter">
+            <input type="text" id="search-input" placeholder="Cari wisata atau daerah..." aria-label="Cari wisata atau daerah">
+            <select id="filter-daerah" aria-label="Filter berdasarkan Daerah">
+                <option value="">Semua Daerah</option>
+            </select>
+            <select id="filter-harga" aria-label="Filter berdasarkan Harga">
+                <option value="">Semua Harga</option>
+                <option value="0-200000">0 - Rp 200.000</option>
+                <option value="200000-500000">Rp 200.000 - Rp 500.000</option>
+                <option value=">500000">> Rp 500.000</option>
+            </select>
+            <select id="filter-rating" aria-label="Filter berdasarkan Rating">
+                <option value="">Semua Rating</option>
+                <option value="4.5">4.5+ Bintang</option>
+                <option value="4">4+ Bintang</option>
+                <option value="3">3+ Bintang</option>
+            </select>
+            <button id="filter-btn" aria-label="Terapkan Filter"><i class="fas fa-search"></i> Filter</button>
+        </section>
+
+        <section id="hasil-pencarian">
+            <h2>Hasil Pencarian</h2>
+            <div id="wisata-list" class="card-grid">
+                </div>
+        </section>
+    </main>
+
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akun Pengguna</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    </head>
+<body>
+    <header>
+        <h1 id="page-title"><i class="fas fa-user-circle"></i> Akun</h1>
+        <a href="index.html" class="back-home-btn"><i class="fas fa-home"></i> Home</a>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <div id="side-menu" class="side-menu">
+        <button class="close-btn" aria-label="Tutup Menu">×</button>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="wisata-home.html"><i class="fas fa-umbrella-beach"></i> Wisata</a>
+            <a href="transportasi.html"><i class="fas fa-plane"></i> Transportasi</a>
+            <a href="hotel.html"><i class="fas fa-hotel"></i> Hotel</a>
+            <div class="separator"></div>
+            <a href="account.html" id="account-link"><i class="fas fa-user-circle"></i> Akun (Login/Signup)</a>
+            </nav>
+    </div>
+
+    <main>
+        <section id="account-content" class="card-section">
+            <h2 id="section-header"></h2>
+            <div id="form-container" class="booking-form-container">
+                </div>
+        </section>
+    </main>
+
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script>
+
+    <script>
+        // SCRIPT LOKAL KHUSUS ACCOUNT.HTML (FINAL & FIX)
+        
+        // PENTING: Jika ALL_USERS_KEY tidak didefinisikan di db-sim.js, ia akan menyebabkan error.
+        // Asumsi: ALL_USERS_KEY sudah didefinisikan di db-sim.js (misalnya: window.ALL_USERS_KEY = 'allUsersData';)
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action');
+            const view = urlParams.get('view');
+            
+            // PENTING: Gunakan window.getLoggedInUser() yang didefinisikan di db-sim.js
+            const user = window.getLoggedInUser ? window.getLoggedInUser() : null; 
+            
+            const contentContainer = document.getElementById('form-container');
+            const header = document.getElementById('section-header');
+            const pageTitle = document.getElementById('page-title');
+
+            // --- FUNGSI BARU: Render Edit Profil ---
+            function renderEditProfileForm(currentUser) {
+                header.textContent = "Edit Profil Saya";
+                pageTitle.innerHTML = '<i class="fas fa-edit"></i> Edit Profil';
+                contentContainer.innerHTML = `
+                    <form id="edit-profile-form">
+                        <label for="profile-name">Nama Profil:</label>
+                        <input type="text" id="profile-name" value="${currentUser.profileName}" required placeholder="Nama lengkap atau panggilan Anda">
+                        
+                        <p style="margin-top: 15px;"><strong>Nama Pengguna:</strong> ${currentUser.username} (Tidak dapat diubah)</p>
+                        
+                        <button type="submit" class="action-btn" style="background-color: var(--primary-color); margin-top: 20px;"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                    </form>
+                    <p style="margin-top: 15px;"><a href="account.html?view=profile">Batal dan Kembali ke Profil</a></p>
+                `;
+                document.getElementById('edit-profile-form').addEventListener('submit', handleProfileUpdate);
+            }
+            
+            // FUNGSI BARU: Handler Update Profil
+            function handleProfileUpdate(e) {
+                e.preventDefault();
+                const newProfileName = document.getElementById('profile-name').value.trim();
+                
+                const user = window.getLoggedInUser();
+                if (user && window.saveUserData) {
+                    user.profileName = newProfileName;
+                    window.saveUserData(user); // Memanggil fungsi dari db-sim.js
+                    
+                    alert('Nama profil berhasil diperbarui!');
+                    window.location.href = 'account.html?view=profile';
+                } else {
+                     alert('Gagal menyimpan. Pastikan fungsi saveUserData tersedia.');
+                }
+            }
+            
+            // --- FUNGSI LAMA: Render Profile (Ditambahkan tombol Edit) ---
+            function renderProfile(currentUser) {
+                header.textContent = `Selamat datang, ${currentUser.profileName}!`;
+                pageTitle.innerHTML = '<i class="fas fa-user-circle"></i> Profil Saya';
+
+                // Pastikan window.getWisataData dan window.getLoggedInUser ada sebelum digunakan
+                const savedWisata = window.getWisataData ? window.getWisataData().filter(w => currentUser.saved.includes(w.id)) : [];
+                
+                contentContainer.innerHTML = `
+                    <div class="profile-info">
+                        <p><strong>Nama Profil:</strong> ${currentUser.profileName}</p>
+                        <p><strong>Nama Pengguna:</strong> ${currentUser.username}</p>
+                        <p><strong>Peran:</strong> ${currentUser.role.toUpperCase()}</p>
+                        
+                        <div style="margin-top: 20px;">
+                            <button id="edit-profile-btn" class="action-btn" style="background-color: #ffc107;"><i class="fas fa-edit"></i> Edit Profil</button>
+                            <button id="logout-btn" class="action-btn" style="background-color: #dc3545; margin-left: 10px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top: 30px;">Wisata Tersimpan (${savedWisata.length})</h4>
+                    <div id="saved-list" class="data-list" style="margin-top: 10px;">
+                        ${savedWisata.length > 0 ? savedWisata.map(w => `
+                            <div class="list-item-admin" style="background: #f1f1f1; padding: 10px;">
+                                <span><a href="wisata-detail.html?id=${w.id}"><strong>${w.nama}</strong></a></span>
+                                <button onclick="window.unSaveWisata(${w.id})" class="action-btn-small" style="background-color: #ffc107; color: #333;"><i class="fas fa-bookmark"></i> Hapus Simpan</button>
+                            </div>
+                        `).join('') : '<p style="font-style: italic;">Anda belum menyimpan wisata apapun.</p>'}
+                    </div>
+                `;
+
+                document.getElementById('logout-btn').addEventListener('click', handleLogout);
+                document.getElementById('edit-profile-btn').addEventListener('click', () => {
+                    window.location.href = 'account.html?view=edit';
+                });
+                
+                window.unSaveWisata = (wisataId) => {
+                    // Panggil fungsi toggleSavedWisata yang seharusnya ada di db-sim.js
+                    if(window.toggleSavedWisata) window.toggleSavedWisata(wisataId); 
+                    renderProfile(window.getLoggedInUser()); 
+                }
+            }
+            
+            // FUNGSI LAMA: Login
+            function renderLogin() {
+                 header.textContent = "Login ke Akun Anda";
+                 pageTitle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                 contentContainer.innerHTML = `
+                    <form id="login-form">
+                        <label for="login-username">Nama Pengguna:</label>
+                        <input type="text" id="login-username" required placeholder="Masukkan username">
+                        
+                        <label for="login-password">Kata Sandi:</label>
+                        <input type="password" id="login-password" required placeholder="Masukkan password">
+                        
+                        <button type="submit" class="action-btn" style="background-color: var(--primary-color);">Login</button>
+                    </form>
+                    <p style="margin-top: 15px;">Belum punya akun? <a href="account.html?action=register">Daftar di sini</a></p>
+                 `;
+                 document.getElementById('login-form').addEventListener('submit', handleLogin);
+            }
+
+            // FUNGSI LAMA: Register
+            function renderRegister() {
+                 header.textContent = "Daftar Akun Baru";
+                 pageTitle.innerHTML = '<i class="fas fa-user-plus"></i> Daftar';
+                 contentContainer.innerHTML = `
+                    <form id="register-form">
+                        <label for="register-name">Nama Profil:</label>
+                        <input type="text" id="register-name" required placeholder="Nama lengkap atau panggilan Anda">
+
+                        <label for="register-username">Nama Pengguna:</label>
+                        <input type="text" id="register-username" required placeholder="Username unik">
+                        
+                        <label for="register-password">Kata Sandi:</label>
+                        <input type="password" id="register-password" required minlength="6" placeholder="Minimal 6 karakter">
+                        
+                        <button type="submit" class="action-btn" style="background-color: var(--primary-color);">Daftar</button>
+                    </form>
+                    <p style="margin-top: 15px;">Sudah punya akun? <a href="account.html?action=login">Login di sini</a></p>
+                 `;
+                 document.getElementById('register-form').addEventListener('submit', handleRegister);
+            }
+            
+            // --- HANDLERS LAMA ---
+            
+            function handleLogin(e) {
+                e.preventDefault();
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+                
+                // Pastikan fungsi global ada
+                if (!window.getAllUsers || !window.getBannedUsers) {
+                    alert('Error: Fungsi database utama tidak terdefinisi (db-sim.js belum dimuat atau ada error).');
+                    return;
+                }
+
+                const users = window.getAllUsers();
+                const foundUser = users.find(u => u.username === username && u.password === password);
+                
+                if (foundUser) {
+                    const bannedUsers = window.getBannedUsers();
+                    const banInfo = bannedUsers.find(b => b.id === foundUser.id);
+                    
+                    if (banInfo && new Date(banInfo.unbanTime) > new Date()) {
+                        alert(`Login Gagal: Akun Anda dibanned hingga ${new Date(banInfo.unbanTime).toLocaleString()}.`);
+                        return;
+                    }
+
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('currentUsername', username);
+                    alert(`Selamat datang kembali, ${foundUser.profileName}!`);
+                    window.location.href = 'index.html'; 
+                } else {
+                    alert('Login Gagal: Nama pengguna atau kata sandi salah.');
+                }
+            }
+
+            function handleRegister(e) {
+                e.preventDefault();
+                const profileName = document.getElementById('register-name').value.trim();
+                const username = document.getElementById('register-username').value.trim();
+                const password = document.getElementById('register-password').value;
+                
+                if (username.length < 3) {
+                    alert('Nama Pengguna minimal 3 karakter.');
+                    return;
+                }
+                
+                // Pastikan fungsi global dan variabel kunci ada
+                if (!window.getAllUsers || typeof ALL_USERS_KEY === 'undefined') {
+                     alert('Error: Fungsi database atau variabel kunci (ALL_USERS_KEY) tidak terdefinisi.');
+                     return;
+                }
+
+                let users = window.getAllUsers();
+                if (users.find(u => u.username === username)) {
+                    alert('Daftar Gagal: Nama pengguna sudah digunakan.');
+                    return;
+                }
+
+                const newId = Math.max(...users.map(u => u.id), 0) + 1;
+                const newUser = {
+                    id: newId,
+                    username,
+                    password,
+                    role: 'user',
+                    profileName: profileName || username,
+                    saved: []
+                };
+
+                users.push(newUser);
+                // Asumsi ALL_USERS_KEY didefinisikan di db-sim.js
+                localStorage.setItem(ALL_USERS_KEY, JSON.stringify(users)); 
+                
+                alert('Pendaftaran Berhasil! Silakan Login.');
+                window.location.href = 'account.html?action=login'; 
+            }
+
+            function handleLogout() {
+                localStorage.setItem('isLoggedIn', 'false');
+                localStorage.removeItem('currentUsername');
+                alert('Anda telah logout.');
+                window.location.href = 'account.html?action=login'; 
+            }
+
+            // --- LOGIKA UTAMA YANG DIPERBARUI ---
+            
+            // PENTING: Cek apakah user berhasil diambil
+            if (user) {
+                // User sudah login
+                if (view === 'edit') {
+                    renderEditProfileForm(user);
+                } else if (view === 'profile' || (!action && !view)) {
+                    renderProfile(user);
+                } else {
+                    // Jika login tapi mencoba mengakses login/register, arahkan ke profil
+                    window.location.href = 'account.html?view=profile';
+                }
+            } else {
+                // User belum login
+                if (action === 'register') {
+                    renderRegister();
+                } else {
+                    // Default: Login
+                    renderLogin();
+                }
+            }
+        });
+        // Ganti fungsi ini di SCRIPT LOKAL account.html Anda
+
+    // FUNGSI BARU: Render Edit Profil (TERMASUK EDIT PASSWORD)
+    function renderEditProfileForm(currentUser) {
+        header.textContent = "Edit Profil & Kata Sandi";
+        pageTitle.innerHTML = '<i class="fas fa-edit"></i> Edit Profil';
+        contentContainer.innerHTML = `
+            <form id="edit-profile-form">
+                <h4>Data Profil</h4>
+                <label for="profile-name">Nama Profil:</label>
+                <input type="text" id="profile-name" value="${currentUser.profileName}" required placeholder="Nama lengkap atau panggilan Anda">
+                
+                <p style="margin-top: 10px; margin-bottom: 20px;"><strong>Nama Pengguna:</strong> ${currentUser.username} (Tidak dapat diubah)</p>
+                
+                <h4 style="margin-top: 30px;">Ubah Kata Sandi (Opsional)</h4>
+                <label for="old-password">Kata Sandi Lama:</label>
+                <input type="password" id="old-password" placeholder="Kosongkan jika tidak ingin diubah">
+                
+                <label for="new-password">Kata Sandi Baru (Min. 6 Karakter):</label>
+                <input type="password" id="new-password" minlength="6" placeholder="Masukkan kata sandi baru">
+
+                <button type="submit" class="action-btn" style="background-color: var(--primary-color); margin-top: 25px;"><i class="fas fa-save"></i> Simpan Perubahan</button>
+            </form>
+            <p style="margin-top: 15px;"><a href="account.html?view=profile">Batal dan Kembali ke Profil</a></p>
+        `;
+        document.getElementById('edit-profile-form').addEventListener('submit', handleProfileUpdate);
+    }
+    
+    // FUNGSI BARU: Handler Update Profil (TERMASUK LOGIKA PASSWORD)
+    function handleProfileUpdate(e) {
+        e.preventDefault();
+        const newProfileName = document.getElementById('profile-name').value.trim();
+        const oldPassword = document.getElementById('old-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        
+        const user = window.getLoggedInUser();
+        if (!user || !window.saveUserData) {
+             alert('Gagal menyimpan. Fungsi database tidak tersedia.');
+             return;
+        }
+
+        user.profileName = newProfileName;
+        
+        // Logika Update Password
+        if (newPassword) {
+            if (oldPassword !== user.password) {
+                alert('Gagal! Kata Sandi Lama salah.');
+                return;
+            }
+            if (newPassword.length < 6) {
+                alert('Kata Sandi Baru harus minimal 6 karakter.');
+                return;
+            }
+            user.password = newPassword;
+            alert('Nama profil dan Kata Sandi berhasil diperbarui!');
+        } else {
+            alert('Nama profil berhasil diperbarui!');
+        }
+
+        window.saveUserData(user); // Simpan perubahan ke Local Storage
+        window.location.href = 'account.html?view=profile'; // Kembali ke profil
+    }
+    
+    // PENTING: Pastikan Anda juga menambahkan tombol "Edit Profil" di renderProfile:
+    /* <button id="edit-profile-btn" class="action-btn" style="background-color: #ffc107;"><i class="fas fa-edit"></i> Edit Profil</button>
+    
+    dan event listener-nya:
+    document.getElementById('edit-profile-btn').addEventListener('click', () => {
+        window.location.href = 'account.html?view=edit';
+    });
+    */
+    </script>
+</body>
+</html>

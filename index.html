@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wonderful Indonesia | Home</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>Wonderful Indonesia</h1>
+        <p>Jelajahi keindahan, temukan perjalanan, pesan hotel!</p>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <div id="side-menu" class="side-menu">
+        <button class="close-btn" aria-label="Tutup Menu">&times;</button>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="wisata-home.html"><i class="fas fa-umbrella-beach"></i> Wisata</a>
+            <a href="transportasi.html"><i class="fas fa-plane"></i> Transportasi</a>
+            <a href="hotel.html"><i class="fas fa-hotel"></i> Hotel</a>
+            <div class="separator"></div>
+            <a href="account.html" id="account-link"><i class="fas fa-user-circle"></i> Akun (Login/Signup)</a>
+            </nav>
+    </div>
+
+    <main class="home-main">
+        <section id="main-navigation" class="card-grid">
+            <a href="wisata-home.html" class="nav-card wisata">
+                <i class="fas fa-umbrella-beach"></i>
+                <h2>Wisata</h2>
+                <p>Temukan destinasi impian Anda.</p>
+            </a>
+            <a href="transportasi.html" class="nav-card transportasi">
+                <i class="fas fa-plane"></i>
+                <h2>Transportasi</h2>
+                <p>Pesan tiket pesawat, kereta, atau bus.</p>
+            </a>
+            <a href="hotel.html" class="nav-card hotel">
+                <i class="fas fa-hotel"></i>
+                <h2>Hotel</h2>
+                <p>Cari dan booking penginapan terbaik.</p>
+            </a>
+        </section>
+
+        <section id="rekomendasi">
+            <h2>Rekomendasi Terbaik</h2>
+            <strong id="maintenance-status" style="display:none; color: red;"></strong>
+            <div id="rekomendasi-list" class="card-grid">
+                </div>
+        </section>
+    </main>
+
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script> 
+</body>
+</html>

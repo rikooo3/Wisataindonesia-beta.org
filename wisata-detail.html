@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Wisata</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1 id="wisata-nama">Detail Wisata</h1>
+        <a href="wisata-home.html" id="Back" class="back-home-btn">
+            <i class="fas fa-arrow-left"></i> Kembali ke Wisata
+        </a>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <div id="side-menu" class="side-menu">
+        <button class="close-btn" aria-label="Tutup Menu">×</button>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="wisata-home.html"><i class="fas fa-umbrella-beach"></i> Wisata</a>
+            <a href="transportasi.html"><i class="fas fa-plane"></i> Transportasi</a>
+            <a href="hotel.html"><i class="fas fa-hotel"></i> Hotel</a>
+            <div class="separator"></div>
+            <a href="account.html" id="account-link"><i class="fas fa-user-circle"></i> Akun (Login/Signup)</a>
+            </nav>
+    </div>
+
+    <main>
+        <section id="gambar-wisata" class="gallery-container">
+            </section>
+
+        <section id="deskripsi" class="card-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2>Deskripsi</h2>
+                <button id="save-btn" class="action-btn save-btn" aria-label="Simpan Wisata"><i class="far fa-bookmark"></i> Simpan</button>
+            </div>
+            <p id="deskripsi-text"></p>
+            <button id="toggle-deskripsi" class="action-btn-small"><i class="fas fa-angle-down"></i> Tampilkan Lebih Banyak</button>
+        </section>
+
+        <section id="info-lain" class="card-section">
+            <h2>Informasi & Ulasan</h2>
+            <div class="info-grid">
+                <p><strong><i class="fas fa-money-bill-wave"></i> Harga Tiket:</strong> <span id="harga"></span></p>
+                <p><strong><i class="fas fa-map-marker-alt"></i> Lokasi:</strong> <a id="lokasi" href="#" target="_blank">Lihat di Google Maps</a></p>
+                <p><strong><i class="fas fa-star"></i> Rating Rata-rata:</strong> <span id="rating"></span> <span id="rating-stars"></span></p>
+            </div>
+            
+            <h3 style="margin-top: 30px;">Ulasan Pengunjung</h3>
+            <div id="ulasan-list">
+                </div>
+            
+            <form id="tambah-ulasan" class="ulasan-form">
+                <h4>Tambahkan Ulasan Anda</h4>
+                <label>Rating (klik bintang):</label>
+                <div id="star-rating" class="star-rating-input">
+                    <i class="far fa-star" data-value="1"></i>
+                    <i class="far fa-star" data-value="2"></i>
+                    <i class="far fa-star" data-value="3"></i>
+                    <i class="far fa-star" data-value="4"></i>
+                    <i class="far fa-star" data-value="5"></i>
+                </div>
+                <input type="hidden" id="rating-input" value="0"> 
+                
+                <label for="ulasan-input">Ulasan:</label>
+                <textarea id="ulasan-input" required placeholder="Tulis ulasan Anda"></textarea>
+                
+                <button type="submit" class="action-btn" style="background-color: var(--primary-color);"><i class="fas fa-paper-plane"></i> Kirim Ulasan</button>
+            </form>
+        </section>
+        
+        <div id="image-modal" class="modal">
+            <span class="close-btn">&times;</span>
+            <img class="modal-content" id="modal-image">
+        </div>
+    </main>
+
+    <script src="db-sim.js"></script>
+    <script src="script.js"></script>
+    <script src="ui-logic.js"></script>
+    <script>
+        // Logika Rating Bintang Interaktif (Detail Wisata)
+        document.addEventListener('DOMContentLoaded', () => {
+             const ratingContainer = document.getElementById('star-rating');
+             const ratingInput = document.getElementById('rating-input');
+
+             if (ratingContainer) {
+                 ratingContainer.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'I') {
+                        const rating = e.target.getAttribute('data-value');
+                        ratingInput.value = rating;
+                        
+                        ratingContainer.querySelectorAll('i').forEach(star => {
+                            if (star.getAttribute('data-value') <= rating) {
+                                star.classList.remove('far');
+                                star.classList.add('fas');
+                            } else {
+                                star.classList.remove('fas');
+                                star.classList.add('far');
+                            }
+                        });
+                    }
+                 });
+             }
+        });
+    </script>
+</body>
+</html>
